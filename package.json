@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/garnerk10/restaurant_page.git"
+    "url": "git+https://github.com/garnerk10/to_do_list.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/garnerk10/restaurant_page/issues"
+    "url": "https://github.com/garnerk10/to_do_list/issues"
   },
-  "homepage": "https://github.com/garnerk10/restaurant_page#readme",
+  "homepage": "https://github.com/garnerk10/t0_do_list#readme",
   "devDependencies": {
     "css-loader": "^6.7.4",
     "gh-pages": "^5.0.0",

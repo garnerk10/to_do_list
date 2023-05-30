@@ -8,18 +8,6 @@ const createContent = (() => {
 })();
 const content = document.getElementById('content');
 
-const projectHolder = (() => {
-    const projectArr = [];
-
-    return{projectArr};
-})();
-
-const createProject = (name, dueDate) => {
-    this.name = name,
-    this.dueDate = dueDate,
-    this.id = projectHolder.projectArr.length,
-}
-
 
 //Create dom elements
 const createHeader = (() => {
@@ -48,6 +36,12 @@ const sideBar = (() => {
 
         const viewAll = document.createElement('h2');
         viewAll.innerText = 'View All';
+        viewAll.setAttribute('id', 'viewAllBtn');
+        sideBar.appendChild(viewAll);
+
+        const newProject = document.createElement('h2');
+        newProject.innerText = 'New Project';
+        newProject.setAttribute('id', 'newProjBtn');
         sideBar.appendChild(viewAll);
 
         const projectsSideDiv = document.createElement('div');
@@ -69,3 +63,22 @@ const createViewerDiv = (() => {
     viewerDiv.setAttribute('id', 'viewerDiv');
     mainDiv.appendChild(viewerDiv);
 })();
+
+
+//Create new projects and store them in array
+const projectHolder = (() => {
+    const projectArr = [];
+
+    const addProject = (obj) => {
+        projectArr.push(obj);
+    };
+
+    return{projectArr, addProject};
+})();
+
+const createProject = (name, dueDate) => {
+    let id = projectHolder.projectArr.length;
+    let taskList = [];
+
+    return {name, dueDate, id, taskList}
+};

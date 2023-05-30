@@ -8,8 +8,20 @@ const createContent = (() => {
 })();
 const content = document.getElementById('content');
 
+const projectHolder = (() => {
+    const projectArr = [];
 
-//Create header bar
+    return{projectArr};
+})();
+
+const createProject = (name, dueDate) => {
+    this.name = name,
+    this.dueDate = dueDate,
+    this.id = projectHolder.projectArr.length,
+}
+
+
+//Create dom elements
 const createHeader = (() => {
     const header = document.createElement('div');
     header.setAttribute('id', 'header');

@@ -21,11 +21,18 @@ const createHeader = (() => {
         header.appendChild(title);
 })();
 
+const createMainDiv = (() => {
+    const mainDiv = document.createElement('div');
+    mainDiv.setAttribute('id', 'mainDiv');
+    content.appendChild(mainDiv);
+})();
+const mainDiv = document.getElementById('mainDiv');
+
 const sideBar = (() => {
     const sideBar = document.createElement('div');
     sideBar.setAttribute('id', 'sideBar');
     sideBar.setAttribute('class', 'sideBar');
-    content.appendChild(sideBar);
+    mainDiv.appendChild(sideBar);
 
         const viewAll = document.createElement('h2');
         viewAll.innerText = 'View All';
@@ -43,4 +50,10 @@ const sideBar = (() => {
             projectsSideHolder.setAttribute('id', 'projectsSideHolder');
             projectsSideHolder.setAttribute('class', 'projectsSideHolder');
             sideBar.appendChild(projectsSideHolder);
+})();
+
+const createViewerDiv = (() => {
+    const viewerDiv = document.createElement('div');
+    viewerDiv.setAttribute('id', 'viewerDiv');
+    mainDiv.appendChild(viewerDiv);
 })();

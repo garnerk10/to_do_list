@@ -6,7 +6,7 @@ const createContent = (() => {
     content.setAttribute('id', 'content');
     document.body.appendChild(content);
 })();
-const content = document.getElementById('content');
+
 
 
 //Create dom elements
@@ -26,7 +26,7 @@ const createMainDiv = (() => {
     mainDiv.setAttribute('id', 'mainDiv');
     content.appendChild(mainDiv);
 })();
-const mainDiv = document.getElementById('mainDiv');
+
 
 const sideBar = (() => {
     const sideBar = document.createElement('div');
@@ -63,6 +63,48 @@ const createViewerDiv = (() => {
     viewerDiv.setAttribute('id', 'viewerDiv');
     mainDiv.appendChild(viewerDiv);
 })();
+
+//create popup form for inputting new projects
+const createProjPopup = (() => {
+    const projPopup = document.createElement('div');
+    projPopup.setAttribute('class', 'projPopup');
+    projPopup.style.display = none;
+    mainDiv.appendChild(projPopup);
+
+        const newProjName = document.createElement('input');
+        newProjName.setAttribute('type', 'text');
+        newProjName.setAttribute('id', 'newProjName');
+        newProjName.setAttribute('name', 'newProjName');
+        newProjName.setAttribute('placeholder', 'New Project');
+        projPopup.appendChild(newProjName);
+
+        const newProjDue = document.createElement('input');
+        newProjDue.setAttribute('type', 'date');
+        newProjDue.setAttribute('id', 'newProjDue');
+        newProjDue.setAttribute('name', 'newProjDue');
+        projPopup.appendChild(newProjDue);
+
+        const addBtn = document.createElement('div');
+        addBtn.setAttribute('id', 'addBtn');
+        projPopup.appendChild(addBtn);
+
+            const addBtnText = document.createElement('h3');
+            addBtnText.innerText = `Add Project`;
+            addBtn.appendChild(addBtnText);
+
+
+})();
+
+//Get elements from DOM
+const viewAllBtn = document.getElementById('viewAllBtn');
+const newProjPopup = document.getElementById('projPopup');
+const projNameInput = document.getElementById('newProjName');
+const projDueInput = document.getElementById('newProjDue');
+const newProjBtn = document.getElementById('newProjBtn');
+const mainDiv = document.getElementById('mainDiv');
+const content = document.getElementById('content');
+
+
 
 
 //Create new projects and store them in array

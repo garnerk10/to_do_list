@@ -6,6 +6,7 @@ const createContent = (() => {
     content.setAttribute('id', 'content');
     document.body.appendChild(content);
 })();
+const content = document.getElementById('content');
 
 
 
@@ -26,6 +27,7 @@ const createMainDiv = (() => {
     mainDiv.setAttribute('id', 'mainDiv');
     content.appendChild(mainDiv);
 })();
+const mainDiv = document.getElementById('mainDiv');
 
 
 const sideBar = (() => {
@@ -42,7 +44,7 @@ const sideBar = (() => {
         const newProject = document.createElement('h2');
         newProject.innerText = 'New Project';
         newProject.setAttribute('id', 'newProjBtn');
-        sideBar.appendChild(viewAll);
+        sideBar.appendChild(newProject);
 
         const projectsSideDiv = document.createElement('div');
         projectsSideDiv.setAttribute('id', 'projectsSideDiv');
@@ -68,7 +70,7 @@ const createViewerDiv = (() => {
 const createProjPopup = (() => {
     const projPopup = document.createElement('div');
     projPopup.setAttribute('class', 'projPopup');
-    projPopup.style.display = none;
+    projPopup.setAttribute('id', 'projPopup');
     mainDiv.appendChild(projPopup);
 
         const newProjName = document.createElement('input');
@@ -84,13 +86,13 @@ const createProjPopup = (() => {
         newProjDue.setAttribute('name', 'newProjDue');
         projPopup.appendChild(newProjDue);
 
-        const addBtn = document.createElement('div');
-        addBtn.setAttribute('id', 'addBtn');
-        projPopup.appendChild(addBtn);
+        const confirmBtn = document.createElement('div');
+        confirmBtn.setAttribute('id', 'confirmBtn');
+        projPopup.appendChild(confirmBtn);
 
-            const addBtnText = document.createElement('h3');
-            addBtnText.innerText = `Add Project`;
-            addBtn.appendChild(addBtnText);
+            const confirmBtnText = document.createElement('h3');
+            confirmBtnText.innerText = `Add Project`;
+            confirmBtn.appendChild(confirmBtnText);
 
 
 })();
@@ -101,10 +103,33 @@ const newProjPopup = document.getElementById('projPopup');
 const projNameInput = document.getElementById('newProjName');
 const projDueInput = document.getElementById('newProjDue');
 const newProjBtn = document.getElementById('newProjBtn');
-const mainDiv = document.getElementById('mainDiv');
-const content = document.getElementById('content');
+const confirmBtn = document.getElementById('confirmBtn');
 
 
+//display popup form to add new project
+const togglePopup = () => {
+    if(newProjPopup.style.display == 'none'){
+        newProjPopup.style.display = 'flex'
+    } else {newProjPopup.style.display = 'none'}
+}
+newProjBtn.addEventListener('click', togglePopup);
+
+
+//"Add" button functionality on new project popup
+const confirmNewProj = () => {
+    let newName = projNameInput.value;
+    let newDue = projDueInput.value;
+    const newProject = createProject(newName, newDue);
+
+    projectHolder.addProject(newProject);
+    console.log(projectHolder.projectArr);
+
+    projNameInput.value = '';
+    projDueInput.value = '';
+
+    togglePopup();
+};
+confirmBtn.addEventListener('click', confirmNewProj);
 
 
 //Create new projects and store them in array
@@ -124,3 +149,5 @@ const createProject = (name, dueDate) => {
 
     return {name, dueDate, id, taskList}
 };
+
+

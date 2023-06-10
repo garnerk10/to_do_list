@@ -29,3 +29,7 @@ body {
     border-radius: 20px;
     margin-top: 10px;
 }
+
+#projPopup {
+    display: none;
+}

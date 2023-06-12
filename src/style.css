@@ -31,8 +31,37 @@ body {
     margin-top: 10px;
     min-height: 100px;
     max-height: 200px;
+    border: 2px solid rgb(158, 158, 158);
+}
+
+#viewerDiv {
+    background-color: white;
+    height: 800px;
+    width: 500px;
+    margin: 10px;
+    border-radius: 20px;
 }
 
 #projPopup {
     display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background-color: red;
+    padding: 10px;
+    justify-content: space-evenly;
 }
+
+#confirmBtn {
+    text-align: center;
+}
+
+.projCard {
+    background-color: red;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+

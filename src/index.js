@@ -46,7 +46,7 @@ const sideBar = (() => {
         newProject.setAttribute('id', 'newProjBtn');
         sideBar.appendChild(newProject);
 
-        const projectsSideDiv = document.createElement('div');
+        /*const projectsSideDiv = document.createElement('div');
         projectsSideDiv.setAttribute('id', 'projectsSideDiv');
         sideBar.appendChild(projectsSideDiv);
 
@@ -57,7 +57,7 @@ const sideBar = (() => {
             const projectsSideHolder = document.createElement('div');
             projectsSideHolder.setAttribute('id', 'projectsSideHolder');
             projectsSideHolder.setAttribute('class', 'projectsSideHolder');
-            sideBar.appendChild(projectsSideHolder);
+            sideBar.appendChild(projectsSideHolder);*/
 })();
 
 const createViewerDiv = (() => {
@@ -104,6 +104,7 @@ const projNameInput = document.getElementById('newProjName');
 const projDueInput = document.getElementById('newProjDue');
 const newProjBtn = document.getElementById('newProjBtn');
 const confirmBtn = document.getElementById('confirmBtn');
+const projectViewer = document.getElementById('viewerDiv');
 
 
 //display popup form to add new project
@@ -122,7 +123,10 @@ const confirmNewProj = () => {
     const newProject = createProject(newName, newDue);
 
     projectHolder.addProject(newProject);
+    projectHolder.projCounter++;
     console.log(projectHolder.projectArr);
+
+    createProjCard(newName, newDue);
 
     projNameInput.value = '';
     projDueInput.value = '';
@@ -132,19 +136,40 @@ const confirmNewProj = () => {
 confirmBtn.addEventListener('click', confirmNewProj);
 
 
+//add new project card to dom
+const createProjCard = (name, due) => {
+    const newProjCard = document.createElement('div');
+    newProjCard.setAttribute('class', 'projCard');
+    newProjCard.setAttribute(`id`, `proj${projectHolder.projCounter}`);
+    projectViewer.appendChild(newProjCard);
+
+        const newProjTitle = document.createElement('h4');
+        newProjTitle.innerText = `${name}`;
+        newProjTitle.setAttribute(`class`, `projectTitle`);
+        newProjCard.appendChild(newProjTitle);
+
+        const newProjDueDate = document.createElement('h5');
+        newProjDueDate.innerText = `${due}`;
+        newProjDueDate.setAttribute(`class`, `projDueDate`);
+        newProjCard.appendChild(newProjDueDate);
+
+}
+
+
 //Create new projects and store them in array
 const projectHolder = (() => {
     const projectArr = [];
+    let projCounter = 0;
 
     const addProject = (obj) => {
         projectArr.push(obj);
     };
 
-    return{projectArr, addProject};
+    return{projectArr, addProject, projCounter};
 })();
 
 const createProject = (name, dueDate) => {
-    let id = projectHolder.projectArr.length;
+    let id = projectHolder.projCounter;
     let taskList = [];
 
     return {name, dueDate, id, taskList}

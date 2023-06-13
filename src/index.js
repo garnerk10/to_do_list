@@ -26,10 +26,15 @@ const createMainDiv = (() => {
     const mainDiv = document.createElement('div');
     mainDiv.setAttribute('id', 'mainDiv');
     content.appendChild(mainDiv);
+
+    //track if there is a popup active to prevent multiple popup windows
+    const popupActive = false;
+    return {popupActive};
 })();
 const mainDiv = document.getElementById('mainDiv');
 
 
+//create sidebar div and contents in dom
 const sideBar = (() => {
     const sideBar = document.createElement('div');
     sideBar.setAttribute('id', 'sideBar');
@@ -45,26 +50,16 @@ const sideBar = (() => {
         newProject.innerText = 'New Project';
         newProject.setAttribute('id', 'newProjBtn');
         sideBar.appendChild(newProject);
-
-        /*const projectsSideDiv = document.createElement('div');
-        projectsSideDiv.setAttribute('id', 'projectsSideDiv');
-        sideBar.appendChild(projectsSideDiv);
-
-            const projectsSideLabel = document.createElement('h3');
-            projectsSideLabel.innerText = "Projects";
-            projectsSideDiv.appendChild(projectsSideLabel);
-
-            const projectsSideHolder = document.createElement('div');
-            projectsSideHolder.setAttribute('id', 'projectsSideHolder');
-            projectsSideHolder.setAttribute('class', 'projectsSideHolder');
-            sideBar.appendChild(projectsSideHolder);*/
 })();
 
+
+//create div in dom that displays projects
 const createViewerDiv = (() => {
     const viewerDiv = document.createElement('div');
     viewerDiv.setAttribute('id', 'viewerDiv');
     mainDiv.appendChild(viewerDiv);
 })();
+
 
 //create popup form for inputting new projects
 const createProjPopup = (() => {
@@ -109,10 +104,10 @@ const projectViewer = document.getElementById('viewerDiv');
 
 //display popup form to add new project
 const togglePopup = () => {
-    if(newProjPopup.style.display == 'none'){
-        newProjPopup.style.display = 'flex'
-    } else {newProjPopup.style.display = 'none'}
-}
+        if(newProjPopup.style.display == 'none'){
+            newProjPopup.style.display = 'flex'
+        } else {newProjPopup.style.display = 'none'};
+};
 newProjBtn.addEventListener('click', togglePopup);
 
 
@@ -172,6 +167,7 @@ const projectHolder = (() => {
     return{projectArr, addProject, projCounter};
 })();
 
+//project constructor
 const createProject = (name, dueDate) => {
     let id = projectHolder.projCounter;
     let taskList = [];
@@ -180,24 +176,37 @@ const createProject = (name, dueDate) => {
 };
 
 
+//Project Detail Popup
+//create project detail popup
 const createProjDetail = (proj) => {
-    const projDetailPopup = document.createElement('div');
-    projDetailPopup.setAttribute('id', 'projDetailPopup');
-    projDetailPopup.setAttribute('class', 'projDetailPopup');
-    mainDiv.appendChild(projDetailPopup);
-    
-        projDetailPopup.innerHTML = `
-        <div id="detailHeader">
-            <h2 id="detailTitle">${proj.name}</h2>
-            <h2 id="detailDue">${proj.dueDate}</h2>
-            <h5 id="closeBtn">X</h5>
-        </div>
 
-        <div id="detailTaskViewer"></div>
+    if(createMainDiv.popupActive === false){
+        createMainDiv.popupActive = true;
 
-        <div id="detailFooter">
-            <h3 id="addTaskBtn">Add Task</h3>
-            <h3 id="deleteTaskBtn">Delete Task</h3>
-            <h3 id="deleteProjBtn">Delete Project</h3>
-        </div>`;
+        const projDetailPopup = document.createElement('div');
+        projDetailPopup.setAttribute('id', 'projDetailPopup');
+        projDetailPopup.setAttribute('class', 'projDetailPopup');
+        mainDiv.appendChild(projDetailPopup);
+        
+            projDetailPopup.innerHTML = `
+            <div id="detailHeader">
+                <h2 class="detailTitle">${proj.name}</h2>
+                <h2 class="detailDue">${proj.dueDate}</h2>
+                <h5 id="closeBtn">X</h5>
+            </div>
+
+            <div id="detailTaskViewer"></div>
+
+            <div id="detailFooter">
+                <h3 id="addTaskBtn">Add Task</h3>
+                <h3 id="deleteTaskBtn">Delete Task</h3>
+                <h3 id="deleteProjBtn">Delete Project</h3>
+            </div>`;
+
+        const closeBtn = document.getElementById('closeBtn');
+        closeBtn.onclick = () => {
+            projDetailPopup.remove();
+            createMainDiv.popupActive = false;
+        };
+    }
 }

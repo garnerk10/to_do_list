@@ -72,3 +72,37 @@ body {
     width: 100%;
 }
 
+
+
+/*Project detail popup*/
+#projDetailPopup {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    width: 600px;
+    height: 400px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: aquamarine;
+    padding: 20px;
+    justify-content: space-between;
+}
+
+#detailHeader {
+    display: flex;
+    justify-content: space-between;
+}
+
+#detailTaskViewer {
+    display: flex;
+    width: 500px;
+    height: 250px;
+    background-color: white;
+    align-self: center;
+}
+
+#detailFooter {
+    display: flex;
+    justify-content: space-between;
+}

@@ -123,7 +123,7 @@ const confirmNewProj = () => {
     const newProject = createProject(newName, newDue);
 
     projectHolder.addProject(newProject);
-    projectHolder.projCounter++;
+    
     console.log(projectHolder.projectArr);
 
     createProjCard(newName, newDue);
@@ -131,6 +131,7 @@ const confirmNewProj = () => {
     projNameInput.value = '';
     projDueInput.value = '';
 
+    projectHolder.projCounter++;
     togglePopup();
 };
 confirmBtn.addEventListener('click', confirmNewProj);
@@ -138,9 +139,10 @@ confirmBtn.addEventListener('click', confirmNewProj);
 
 //add new project card to dom
 const createProjCard = (name, due) => {
+    const projCounterValue = projectHolder.projCounter;
     const newProjCard = document.createElement('div');
     newProjCard.setAttribute('class', 'projCard');
-    newProjCard.setAttribute(`id`, `proj${projectHolder.projCounter}`);
+    newProjCard.setAttribute(`id`, `${projCounterValue}`);
     projectViewer.appendChild(newProjCard);
 
         const newProjTitle = document.createElement('h4');
@@ -152,6 +154,8 @@ const createProjCard = (name, due) => {
         newProjDueDate.innerText = `${due}`;
         newProjDueDate.setAttribute(`class`, `projDueDate`);
         newProjCard.appendChild(newProjDueDate);
+
+    newProjCard.onclick = () => {createProjDetail(projectHolder.projectArr[projCounterValue])};
 
 }
 
@@ -176,3 +180,24 @@ const createProject = (name, dueDate) => {
 };
 
 
+const createProjDetail = (proj) => {
+    const projDetailPopup = document.createElement('div');
+    projDetailPopup.setAttribute('id', 'projDetailPopup');
+    projDetailPopup.setAttribute('class', 'projDetailPopup');
+    mainDiv.appendChild(projDetailPopup);
+    
+        projDetailPopup.innerHTML = `
+        <div id="detailHeader">
+            <h2 id="detailTitle">${proj.name}</h2>
+            <h2 id="detailDue">${proj.dueDate}</h2>
+            <h5 id="closeBtn">X</h5>
+        </div>
+
+        <div id="detailTaskViewer"></div>
+
+        <div id="detailFooter">
+            <h3 id="addTaskBtn">Add Task</h3>
+            <h3 id="deleteTaskBtn">Delete Task</h3>
+            <h3 id="deleteProjBtn">Delete Project</h3>
+        </div>`;
+}

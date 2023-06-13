@@ -34,6 +34,8 @@ body {
     border: 2px solid rgb(158, 158, 158);
 }
 
+
+/*area to view all projects*/
 #viewerDiv {
     background-color: white;
     height: 800px;
@@ -42,6 +44,8 @@ body {
     border-radius: 20px;
 }
 
+
+/*New project popup with input*/
 #projPopup {
     display: none;
     position: absolute;
@@ -58,6 +62,9 @@ body {
     text-align: center;
 }
 
+
+
+/*Project cards viewed in main viewer*/
 .projCard {
     background-color: red;
     display: flex;

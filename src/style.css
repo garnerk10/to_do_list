@@ -39,9 +39,11 @@ body {
 #viewerDiv {
     background-color: white;
     height: 800px;
-    width: 500px;
+    width: 800px;
+    min-width: 300px;
     margin: 10px;
     border-radius: 20px;
+    margin: auto;
 }
 
 
@@ -95,14 +97,26 @@ body {
 }
 
 #detailTaskViewer {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr;
     width: 500px;
     height: 250px;
     background-color: white;
     align-self: center;
+    overflow: scroll;
 }
 
 #detailFooter {
     display: flex;
     justify-content: space-between;
+}
+
+#newTaskInput {
+    display: flex;
+    justify-content: space-between;
+    height: 25px;
+}
+
+#newTaskBtns {
+    display: flex;
 }

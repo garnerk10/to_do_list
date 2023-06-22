@@ -203,10 +203,34 @@ const createProjDetail = (proj) => {
                 <h3 id="deleteProjBtn">Delete Project</h3>
             </div>`;
 
+        //Close button and ensure multiple popups don't appear
         const closeBtn = document.getElementById('closeBtn');
         closeBtn.onclick = () => {
             projDetailPopup.remove();
             createMainDiv.popupActive = false;
         };
+
+        //Functions within project detail popup
+        const taskViewer = document.getElementById('detailTaskViewer');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const deleteTaskBtn = document.getElementById('deleteTaskBtn');
+        const deleteProjBtn = document.getElementById('deleteProjBtn');
+
+        //Create task entry inputs
+        const createTaskInput = () => {
+            const newTaskInput = document.createElement('div');
+            newTaskInput.innerHTML = `
+                <input type='text' id='taskName' placeholder='New Task' name='taskName'></input>
+
+                <div id='newTaskBtns'>
+                    <h4 id='addTaskBtn' class='newTaskBtn'>+</h4>
+                    <h4 id='cancelAddTask' class='newTaskBtn'>X</h4>
+                </div>`;
+            newTaskInput.setAttribute('id', 'newTaskInput');
+            taskViewer.appendChild(newTaskInput);
+        };
+        addTaskBtn.addEventListener('click', createTaskInput);
+        
+
     }
 }

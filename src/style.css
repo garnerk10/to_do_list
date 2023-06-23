@@ -104,6 +104,8 @@ body {
     background-color: white;
     align-self: center;
     overflow: scroll;
+    grid-template-rows: 40px;
+    grid-auto-rows: 40px;
 }
 
 #detailFooter {
@@ -114,9 +116,17 @@ body {
 #newTaskInput {
     display: flex;
     justify-content: space-between;
-    height: 25px;
+    height: 40px;
+    align-items: center;
 }
 
 #newTaskBtns {
     display: flex;
+    align-items: center;
+}
+
+.newTaskBtn {
+    width: 30px;
+    display: flex;
+    justify-content: center;
 }

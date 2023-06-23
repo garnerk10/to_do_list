@@ -171,8 +171,19 @@ const projectHolder = (() => {
 const createProject = (name, dueDate) => {
     let id = projectHolder.projCounter;
     let taskList = [];
+    let taskCounter = 0;
 
-    return {name, dueDate, id, taskList}
+    const createTask = (task) => {
+        const taskId = taskCounter;
+        taskCounter++;
+        return {task, taskId}
+    }
+
+    const addTaskToList = (task) => {
+        taskList.push(createTask(task))
+    }
+
+    return {name, dueDate, id, taskList, addTaskToList, taskCounter}
 };
 
 
@@ -182,6 +193,9 @@ const createProjDetail = (proj) => {
 
     if(createMainDiv.popupActive === false){
         createMainDiv.popupActive = true;
+
+        //only allow 1 input active at once
+        let isInputActive = false;
 
         const projDetailPopup = document.createElement('div');
         projDetailPopup.setAttribute('id', 'projDetailPopup');
@@ -218,16 +232,20 @@ const createProjDetail = (proj) => {
 
         //Create task entry inputs
         const createTaskInput = () => {
-            const newTaskInput = document.createElement('div');
-            newTaskInput.innerHTML = `
-                <input type='text' id='taskName' placeholder='New Task' name='taskName'></input>
+            if(isInputActive === false){
+                isInputActive = true;
 
-                <div id='newTaskBtns'>
-                    <h4 id='addTaskBtn' class='newTaskBtn'>+</h4>
-                    <h4 id='cancelAddTask' class='newTaskBtn'>X</h4>
-                </div>`;
-            newTaskInput.setAttribute('id', 'newTaskInput');
-            taskViewer.appendChild(newTaskInput);
+                const newTaskInput = document.createElement('div');
+                newTaskInput.innerHTML = `
+                    <input type='text' id='taskName' placeholder='New Task' name='taskName'></input>
+
+                    <div id='newTaskBtns'>
+                        <h4 id='addTaskBtn' class='newTaskBtn'>+</h4>
+                        <h4 id='cancelAddTask' class='newTaskBtn'>X</h4>
+                    </div>`;
+                newTaskInput.setAttribute('id', 'newTaskInput');
+                taskViewer.appendChild(newTaskInput);
+            };
         };
         addTaskBtn.addEventListener('click', createTaskInput);
         

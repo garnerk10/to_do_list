@@ -118,8 +118,6 @@ const confirmNewProj = () => {
     const newProject = createProject(newName, newDue);
 
     projectHolder.addProject(newProject);
-    
-    console.log(projectHolder.projectArr);
 
     createProjCard(newName, newDue);
 
@@ -128,6 +126,7 @@ const confirmNewProj = () => {
 
     projectHolder.projCounter++;
     togglePopup();
+    console.log(projectHolder.projCounter);
 };
 confirmBtn.addEventListener('click', confirmNewProj);
 
@@ -175,12 +174,12 @@ const createProject = (name, dueDate) => {
 
     const createTask = (task) => {
         const taskId = taskCounter;
-        taskCounter++;
         return {task, taskId}
-    }
+    };
 
     const addTaskToList = (task) => {
-        taskList.push(createTask(task))
+        taskList.push(createTask(task));
+        taskCounter++;
     }
 
     return {name, dueDate, id, taskList, addTaskToList, taskCounter}
@@ -232,20 +231,63 @@ const createProjDetail = (proj) => {
 
         //Create task entry inputs
         const createTaskInput = () => {
+            let thisTaskId = proj.taskCounter;
+
             if(isInputActive === false){
                 isInputActive = true;
 
                 const newTaskInput = document.createElement('div');
-                newTaskInput.innerHTML = `
-                    <input type='text' id='taskName' placeholder='New Task' name='taskName'></input>
-
-                    <div id='newTaskBtns'>
-                        <h4 id='addTaskBtn' class='newTaskBtn'>+</h4>
-                        <h4 id='cancelAddTask' class='newTaskBtn'>X</h4>
-                    </div>`;
                 newTaskInput.setAttribute('id', 'newTaskInput');
                 taskViewer.appendChild(newTaskInput);
+
+                    const taskInputEle = document.createElement('input');
+                    taskInputEle.setAttribute(`id`, `taskName${thisTaskId}`);
+                    taskInputEle.setAttribute(`placeholder`, `New Task`);
+                    taskInputEle.setAttribute(`name`, `taskName${thisTaskId}`);
+                    newTaskInput.appendChild(taskInputEle);
+
+                    const newTaskBtnsDiv = document.createElement('div');
+                    newTaskBtnsDiv.setAttribute(`id`, `newTaskBtns`);
+
+                        const confirmBtnEle = document.createElement('h4');
+                        confirmBtnEle.setAttribute(`id`, `confirmTaskBtn${thisTaskId}`);
+                        confirmBtnEle.setAttribute(`class`, `newTaskBtn`);
+                        confirmBtnEle.innerText = `+`;
+
+                        const cancelAddTaskBtnEle = document.createElement(`h4`);
+                        cancelAddTaskBtnEle.setAttribute(`id`, `cancelAddTaskBtn${thisTaskId}`);
+                        cancelAddTaskBtnEle.setAttribute(`class`, `newTaskBtn`);
+                        cancelAddTaskBtnEle.innerText = `X`;
+
+                        newTaskBtnsDiv.appendChild(confirmBtnEle);
+                        newTaskBtnsDiv.appendChild(cancelAddTaskBtnEle);
+                    newTaskInput.appendChild(newTaskBtnsDiv);
             };
+
+            const confirmTaskBtn = document.getElementById(`confirmTaskBtn${thisTaskId}`);
+            const cancelAddTaskBtn = document.getElementById(`cancelAddTaskBtn${thisTaskId}`);
+
+            confirmTaskBtn.onclick = function(){
+
+                const newTaskName = document.getElementById(`taskName${thisTaskId}`);
+
+                //get input value from new task input
+                const inputValue = newTaskName.value;
+
+                //add task to task array of project
+                proj.addTaskToList(inputValue);
+                console.log(proj);
+
+                //new element to replace the input element
+                const taskReplacer = document.createElement('p');
+                taskReplacer.innerText = `${inputValue}`;
+
+                //replace input element with p element in dom
+                newTaskName.replaceWith(taskReplacer);
+
+                isInputActive = false;
+                console.log(proj.taskCounter);
+            }
         };
         addTaskBtn.addEventListener('click', createTaskInput);
         

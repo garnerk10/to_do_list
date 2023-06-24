@@ -179,8 +179,7 @@ const createProject = (name, dueDate) => {
 
     const addTaskToList = (task) => {
         taskList.push(createTask(task));
-        taskCounter++;
-    }
+    };
 
     return {name, dueDate, id, taskList, addTaskToList, taskCounter}
 };
@@ -276,7 +275,7 @@ const createProjDetail = (proj) => {
 
                 //add task to task array of project
                 proj.addTaskToList(inputValue);
-                console.log(proj);
+                proj.taskCounter++;
 
                 //new element to replace the input element
                 const taskReplacer = document.createElement('p');

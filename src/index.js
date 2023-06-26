@@ -126,7 +126,7 @@ const confirmNewProj = () => {
 
     projectHolder.projCounter++;
     togglePopup();
-    console.log(projectHolder.projCounter);
+    console.log(projectHolder.projectArr);
 };
 confirmBtn.addEventListener('click', confirmNewProj);
 
@@ -149,7 +149,7 @@ const createProjCard = (name, due) => {
         newProjDueDate.setAttribute(`class`, `projDueDate`);
         newProjCard.appendChild(newProjDueDate);
 
-    newProjCard.onclick = () => {createProjDetail(projectHolder.projectArr[projCounterValue])};
+    newProjCard.onclick = (e) => {createProjDetail(projectHolder.projectArr.find(ele => ele.id == e.target.id))};
 
 }
 
@@ -168,7 +168,7 @@ const projectHolder = (() => {
 
 //project constructor
 const createProject = (name, dueDate) => {
-    let id = projectHolder.projCounter;
+    const id = projectHolder.projCounter;
     let taskList = [];
     let taskCounter = 0;
 
@@ -179,9 +179,10 @@ const createProject = (name, dueDate) => {
 
     const addTaskToList = (task) => {
         taskList.push(createTask(task));
+        taskCounter++;
     };
 
-    return {name, dueDate, id, taskList, addTaskToList, taskCounter}
+    return {name, dueDate, id, taskList, addTaskToList, taskCounter};
 };
 
 
@@ -266,7 +267,8 @@ const createProjDetail = (proj) => {
             const confirmTaskBtn = document.getElementById(`confirmTaskBtn${thisTaskId}`);
             const cancelAddTaskBtn = document.getElementById(`cancelAddTaskBtn${thisTaskId}`);
 
-            confirmTaskBtn.onclick = function(){
+            //"+" button after new task name has been entered
+            const confirmTaskBtnFunc = () => {
 
                 const newTaskName = document.getElementById(`taskName${thisTaskId}`);
 
@@ -285,8 +287,9 @@ const createProjDetail = (proj) => {
                 newTaskName.replaceWith(taskReplacer);
 
                 isInputActive = false;
-                console.log(proj.taskCounter);
-            }
+                confirmTaskBtn.removeEventListener(`click`, confirmTaskBtnFunc);
+            };
+            confirmTaskBtn.addEventListener(`click`, confirmTaskBtnFunc);
         };
         addTaskBtn.addEventListener('click', createTaskInput);
         

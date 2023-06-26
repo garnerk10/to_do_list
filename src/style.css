@@ -113,7 +113,7 @@ body {
     justify-content: space-between;
 }
 
-#newTaskInput {
+.newTaskInput {
     display: flex;
     justify-content: space-between;
     height: 40px;

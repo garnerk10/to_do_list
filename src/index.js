@@ -237,7 +237,8 @@ const createProjDetail = (proj) => {
                 isInputActive = true;
 
                 const newTaskInput = document.createElement('div');
-                newTaskInput.setAttribute('id', 'newTaskInput');
+                newTaskInput.setAttribute(`id`, `newTaskInput${thisTaskId}`);
+                newTaskInput.setAttribute(`class`, `newTaskInput`);
                 taskViewer.appendChild(newTaskInput);
 
                     const taskInputEle = document.createElement('input');
@@ -290,6 +291,20 @@ const createProjDetail = (proj) => {
                 confirmTaskBtn.removeEventListener(`click`, confirmTaskBtnFunc);
             };
             confirmTaskBtn.addEventListener(`click`, confirmTaskBtnFunc);
+
+
+            //Remove task button to remove task from project task array and dom
+            const cancelTaskFunc = (e) => {
+
+                //remove task from task viewer in dom
+                const taskInDom = document.getElementById(`newTaskInput${thisTaskId}`);
+                taskViewer.removeChild(taskInDom);
+
+                //remove task from project task array
+                proj.taskList = proj.taskList.filter(task => task.taskId !== thisTaskId);
+
+            };
+            cancelAddTaskBtn.addEventListener(`click`, cancelTaskFunc);
         };
         addTaskBtn.addEventListener('click', createTaskInput);
         

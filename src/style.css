@@ -110,10 +110,10 @@ body {
 
 #detailFooter {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
 }
 
-.newTaskInput {
+.newTaskInput, .incompleteTask {
     display: flex;
     justify-content: space-between;
     height: 40px;
@@ -129,4 +129,12 @@ body {
     width: 30px;
     display: flex;
     justify-content: center;
+}
+
+.completeTask {
+    background-color: green;
+    display: flex;
+    justify-content: space-between;
+    height: 40px;
+    align-items: center;
 }

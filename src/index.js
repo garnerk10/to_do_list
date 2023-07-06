@@ -178,7 +178,13 @@ const createProject = (name, dueDate) => {
 
     const createTask = (task) => {
         const taskId = taskCounter;
-        return {task, taskId}
+        let taskCompleted = false;
+        const toggleTaskCompleted = () => {
+            if(taskCompleted === false){
+                taskCompleted = true
+            } else if(taskCompleted === true){taskCompleted = false};
+        }
+        return {task, taskId, taskCompleted, toggleTaskCompleted};
     };
 
     const addTaskToList = (task) => {
@@ -186,7 +192,60 @@ const createProject = (name, dueDate) => {
         taskCounter++;
     };
 
-    return {name, dueDate, id, taskList, addTaskToList, taskCounter};
+    //display tasks from taskList in project detail
+    const displayTasks = () => {
+        taskList.forEach((task) => {
+            const taskBeingAdded = document.createElement(`div`);
+            const taskViewer = document.getElementById(`detailTaskViewer`);
+            taskViewer.appendChild(taskBeingAdded);
+
+            //get and set id for task being displayed
+            taskBeingAdded.setAttribute(`id`, `newTaskInput${task.taskId}`);
+
+            //get and set class of div depending on if it is complete or not
+            if(task.taskCompleted === true){
+                taskBeingAdded.className = `completeTask`
+            } else if(task.taskCompleted === false){
+                taskBeingAdded.className = `incompleteTask`
+            };
+
+            //add toggle complete function listener to div
+            taskBeingAdded.addEventListener(`click`, function(){
+                if(taskBeingAdded.className === `incompleteTask`){
+                    taskBeingAdded.className = `completeTask`;
+                    task.toggleTaskCompleted();
+                } else {
+                    taskBeingAdded.className =`incompleteTask`;
+                    task.toggleTaskCompleted()};
+            });
+
+                const taskName = document.createElement(`p`);
+                taskName.innerText = `${task.task}`;
+                taskBeingAdded.appendChild(taskName);
+
+                const btnHolder = document.createElement(`div`);
+                btnHolder.className = `newTaskBtns`;
+                taskBeingAdded.appendChild(btnHolder);
+                
+                    const cancelBtn = document.createElement(`h4`);
+                    cancelBtn.setAttribute(`id`, `cancelAddTaskBtn${task.taskId}`);
+                    cancelBtn.setAttribute(`class`, `newTaskBtn`);
+                    cancelBtn.innerText = `X`;
+                    btnHolder.appendChild(cancelBtn);
+
+                    cancelBtn.addEventListener(`click`, function(){
+                        //remove task from task viewer in dom
+                        const taskInDom = document.getElementById(`newTaskInput${task.taskId}`);
+                        taskViewer.removeChild(taskInDom);
+
+                        //remove task from project task array
+                        proj.taskList = proj.taskList.filter(each => each.taskId !== task.taskId);
+                    })
+
+        })
+    }
+
+    return {name, dueDate, id, taskList, addTaskToList, taskCounter, displayTasks};
 };
 
 
@@ -252,7 +311,7 @@ const createProjDetail = (proj) => {
                     newTaskInput.appendChild(taskInputEle);
 
                     const newTaskBtnsDiv = document.createElement('div');
-                    newTaskBtnsDiv.setAttribute(`id`, `newTaskBtns`);
+                    newTaskBtnsDiv.setAttribute(`class`, `newTaskBtns`);
 
                         const confirmBtnEle = document.createElement('h4');
                         confirmBtnEle.setAttribute(`id`, `confirmTaskBtn${thisTaskId}`);
@@ -284,6 +343,7 @@ const createProjDetail = (proj) => {
                 //add task to task array of project
                 proj.addTaskToList(inputValue);
                 proj.taskCounter++;
+                const thisTask = proj.taskList.find(task => task.taskId == thisTaskId);
 
                 //new element to replace the input element
                 const taskReplacer = document.createElement('p');
@@ -297,9 +357,13 @@ const createProjDetail = (proj) => {
 
                 //Toggle if the task is complete or not
                 const toggleComplete = () => {
-                    if(newTaskDiv.className == `incompleteTask`){
-                        newTaskDiv.className = `completeTask`
-                    } else {newTaskDiv.className = `incompleteTask`};
+                    if(newTaskDiv.className === `incompleteTask`){
+                        newTaskDiv.className = `completeTask`;
+                        thisTask.taskCompleted = true;
+                    } else {
+                        newTaskDiv.className =`incompleteTask`;
+                        thisTask.taskCompleted = false;};
+
                 };
                 
                 isInputActive = false;
@@ -354,5 +418,7 @@ const createProjDetail = (proj) => {
         deleteProjBtn.addEventListener(`click`, removeProjFunc);
         
 
-    }
+    };
+
+    proj.displayTasks();
 }

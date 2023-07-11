@@ -126,7 +126,6 @@ const confirmNewProj = () => {
 
     projectHolder.projCounter++;
     togglePopup();
-    console.log(projectHolder.projectArr);
 };
 confirmBtn.addEventListener('click', confirmNewProj);
 
@@ -170,6 +169,20 @@ const projectHolder = (() => {
     return{projectArr, addProject, projCounter, removeProject};
 })();
 
+
+//Set active project being viewed in dom so it can be accessed by other functions
+const activeProjectController = (() => {
+    let isProjDetailActive = false;
+    let activeProject = null;
+    const setActiveProject = (num) => {
+        if(isProjDetailActive === false){
+            activeProject = projectHolder.projectArr.find(project => project.id == num);
+        };
+        console.log(activeProject);
+    };
+    return{isProjDetailActive, activeProject, setActiveProject};
+})();
+
 //project constructor
 const createProject = (name, dueDate) => {
     const id = projectHolder.projCounter;
@@ -177,15 +190,15 @@ const createProject = (name, dueDate) => {
     let taskCounter = 0;
 
     const createTask = (task) => {
-        const taskId = taskCounter;
+        const taskId = `${id}.${taskCounter}`;
+        const owningProject = id;
         let taskCompleted = false;
         const toggleTaskCompleted = () => {
             if(taskCompleted === false){
                 taskCompleted = true;
             } else if(taskCompleted === true){taskCompleted = false};
-            console.log(taskCompleted);
         }
-        return {task, taskId, taskCompleted, toggleTaskCompleted};
+        return {task, taskId, taskCompleted, toggleTaskCompleted, owningProject};
     };
 
     const addTaskToList = (task) => {
@@ -249,11 +262,16 @@ const createProject = (name, dueDate) => {
     return {name, dueDate, id, taskList, addTaskToList, taskCounter, displayTasks};
 };
 
-
+//Toggle whether a task is completed or not in dom
 const domTaskToggle = (e) => {
     const divId = e.target.id;
-    console.log(divId)
-}
+
+    if(e.target.className == `incompleteTask`){
+        e.target.className = `completeTask`;
+    } else if(e.target.className == `completeTask`){
+        e.target.className = `incompleteTask`;
+    };
+};
 
 //Project Detail Popup
 //create project detail popup
@@ -263,6 +281,8 @@ const createProjDetail = (proj) => {
         createMainDiv.popupActive = true;
 
         const detailId = proj.id;
+        activeProjectController.setActiveProject(detailId);
+
 
         //only allow 1 input active at once
         let isInputActive = false;
@@ -349,7 +369,6 @@ const createProjDetail = (proj) => {
                 //add task to task array of project
                 proj.addTaskToList(inputValue);
                 proj.taskCounter++;
-                const thisTask = proj.taskList.find(task => task.taskId == thisTaskId);
 
                 //new element to replace the input element
                 const taskReplacer = document.createElement('p');
@@ -360,18 +379,6 @@ const createProjDetail = (proj) => {
 
                 //change class of the new div to incompleteTask
                 newTaskDiv.setAttribute(`class`, `incompleteTask`);
-
-                //Toggle if the task is complete or not
-                /*const toggleComplete = () => {
-                    if(newTaskDiv.className === `incompleteTask`){
-                        newTaskDiv.className = `completeTask`;
-                        thisTask.taskCompleted = true;
-                    } else {
-                        newTaskDiv.className =`incompleteTask`;
-                        thisTask.taskCompleted = false;};
-                    console.log(thisTask);
-
-                };*/
                 
                 isInputActive = false;
 
@@ -386,7 +393,6 @@ const createProjDetail = (proj) => {
             };
             confirmTaskBtn.addEventListener(`click`, confirmTaskBtnFunc);
 
-            
 
 
             //Remove task button "X", to remove task from project task array and dom
@@ -415,7 +421,6 @@ const createProjDetail = (proj) => {
 
             //remove project from project array
             projectHolder.removeProject(detailId);
-            console.log(projectHolder.projectArr);
 
             //close project detail popup
             projDetailPopup.remove();

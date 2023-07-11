@@ -181,8 +181,9 @@ const createProject = (name, dueDate) => {
         let taskCompleted = false;
         const toggleTaskCompleted = () => {
             if(taskCompleted === false){
-                taskCompleted = true
+                taskCompleted = true;
             } else if(taskCompleted === true){taskCompleted = false};
+            console.log(taskCompleted);
         }
         return {task, taskId, taskCompleted, toggleTaskCompleted};
     };
@@ -239,7 +240,7 @@ const createProject = (name, dueDate) => {
                         taskViewer.removeChild(taskInDom);
 
                         //remove task from project task array
-                        proj.taskList = proj.taskList.filter(each => each.taskId !== task.taskId);
+                        taskList = taskList.filter(each => each.taskId !== task.taskId);
                     })
 
         })
@@ -248,6 +249,11 @@ const createProject = (name, dueDate) => {
     return {name, dueDate, id, taskList, addTaskToList, taskCounter, displayTasks};
 };
 
+
+const domTaskToggle = (e) => {
+    const divId = e.target.id;
+    console.log(divId)
+}
 
 //Project Detail Popup
 //create project detail popup
@@ -356,15 +362,16 @@ const createProjDetail = (proj) => {
                 newTaskDiv.setAttribute(`class`, `incompleteTask`);
 
                 //Toggle if the task is complete or not
-                const toggleComplete = () => {
+                /*const toggleComplete = () => {
                     if(newTaskDiv.className === `incompleteTask`){
                         newTaskDiv.className = `completeTask`;
                         thisTask.taskCompleted = true;
                     } else {
                         newTaskDiv.className =`incompleteTask`;
                         thisTask.taskCompleted = false;};
+                    console.log(thisTask);
 
-                };
+                };*/
                 
                 isInputActive = false;
 
@@ -372,7 +379,7 @@ const createProjDetail = (proj) => {
                 confirmTaskBtn.removeEventListener(`click`, confirmTaskBtnFunc);
 
                 const addListenter = () => {
-                    newTaskDiv.onclick = toggleComplete;
+                    newTaskDiv.onclick = domTaskToggle;
                 }
                 setTimeout(addListenter, 100);
                 

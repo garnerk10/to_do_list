@@ -148,7 +148,7 @@ const createProjCard = (name, due) => {
         newProjDueDate.setAttribute(`class`, `projDueDate`);
         newProjCard.appendChild(newProjDueDate);
 
-    newProjCard.onclick = (e) => {createProjDetail(projectHolder.projectArr.find(ele => ele.id == e.target.id))};
+    newProjCard.onclick = (e) => {createProjDetail(projectHolder.projectArr.find(({projectId}) => projectId == e.target.id))};
 
 }
 
@@ -173,38 +173,47 @@ const projectHolder = (() => {
 //Set active project being viewed in dom so it can be accessed by other functions
 const activeProjectController = (() => {
     let isProjDetailActive = false;
-    let activeProject = null;
+    let activeProject = {};
     const setActiveProject = (num) => {
         if(isProjDetailActive === false){
-            activeProject = projectHolder.projectArr.find(project => project.id == num);
+            activeProjectController.activeProject = projectHolder.projectArr.find(({projectId}) => projectId == num);
         };
-        console.log(activeProject);
+        console.log(activeProjectController.activeProject);
     };
     return{isProjDetailActive, activeProject, setActiveProject};
 })();
 
-//project constructor
+
+//project factory function
 const createProject = (name, dueDate) => {
-    const id = projectHolder.projCounter;
+    const projectId = projectHolder.projCounter;
     let taskList = [];
     let taskCounter = 0;
 
-    const createTask = (task) => {
-        const taskId = `${id}.${taskCounter}`;
-        const owningProject = id;
-        let taskCompleted = false;
-        const toggleTaskCompleted = () => {
-            if(taskCompleted === false){
-                taskCompleted = true;
-            } else if(taskCompleted === true){taskCompleted = false};
-        }
-        return {task, taskId, taskCompleted, toggleTaskCompleted, owningProject};
-    };
+    class Task {
+        constructor(name) {
+            this.taskId = `${projectId}.${taskCounter}`,
+            this.owningProject = projectId,
+            this.taskCompleted = false,
+            this.name = name,
 
-    const addTaskToList = (task) => {
-        taskList.push(createTask(task));
-        taskCounter++;
-    };
+            this.toggleTaskCompleted = function(){
+                if(this.taskCompleted === false){
+                    this.taskCompleted = true;
+                } else if(this.taskCompleted === true){this.taskCompleted = false};
+            }
+        }
+    }
+
+    const createTask = (str) => {
+        return str = new Task(str);
+    }
+
+    function addTaskToList(task) {
+            taskList.push(createTask(task));
+            taskCounter++;
+            console.log(taskList);
+        }
 
     //display tasks from taskList in project detail
     const displayTasks = () => {
@@ -214,7 +223,7 @@ const createProject = (name, dueDate) => {
             taskViewer.appendChild(taskBeingAdded);
 
             //get and set id for task being displayed
-            taskBeingAdded.setAttribute(`id`, `newTaskInput${task.taskId}`);
+            taskBeingAdded.setAttribute(`id`, `${task.taskId}`);
 
             //get and set class of div depending on if it is complete or not
             if(task.taskCompleted === true){
@@ -234,7 +243,7 @@ const createProject = (name, dueDate) => {
             });
 
                 const taskName = document.createElement(`p`);
-                taskName.innerText = `${task.task}`;
+                taskName.innerText = `${task.name}`;
                 taskBeingAdded.appendChild(taskName);
 
                 const btnHolder = document.createElement(`div`);
@@ -249,7 +258,7 @@ const createProject = (name, dueDate) => {
 
                     cancelBtn.addEventListener(`click`, function(){
                         //remove task from task viewer in dom
-                        const taskInDom = document.getElementById(`newTaskInput${task.taskId}`);
+                        const taskInDom = document.getElementById(`${task.taskId}`);
                         taskViewer.removeChild(taskInDom);
 
                         //remove task from project task array
@@ -259,7 +268,7 @@ const createProject = (name, dueDate) => {
         })
     }
 
-    return {name, dueDate, id, taskList, addTaskToList, taskCounter, displayTasks};
+    return {name, dueDate, projectId, taskList, addTaskToList, taskCounter, displayTasks};
 };
 
 //Toggle whether a task is completed or not in dom
@@ -268,9 +277,29 @@ const domTaskToggle = (e) => {
 
     if(e.target.className == `incompleteTask`){
         e.target.className = `completeTask`;
+
+        //Access the projectHolder array, match the proj ID to the activeProject, match the taskId to the id of the target div
+        //projectHolder.projectArr.find((proj) => proj.id == activeProjectController.activeProject.id).taskList.find((tsk) => tsk.id == divId).toggleTaskCompleted();
+
+        let thisProject = activeProjectController.activeProject;
+        console.log(activeProjectController.activeProject);
+        let thisTaskList = thisProject.taskList;
+        console.log(thisTaskList);
+        let thisTask = thisTaskList.find(({taskId}) => taskId == divId);
+        console.log(thisTask);
+        thisTask.toggleTaskCompleted();
     } else if(e.target.className == `completeTask`){
         e.target.className = `incompleteTask`;
+
+        //projectHolder.projectArr.find((proj) => proj.id === activeProjectController.activeProject.id).taskList.find((tsk) => tsk.id === divId).toggleTaskCompleted();
+        let thisProject = activeProjectController.activeProject;
+        let thisTaskList = thisProject.taskList;
+        let thisTask = thisTaskList.find(({taskId}) => taskId == divId);
+        thisTask.toggleTaskCompleted();
+        
     };
+
+    console.log(projectHolder.projectArr);
 };
 
 //Project Detail Popup
@@ -280,8 +309,9 @@ const createProjDetail = (proj) => {
     if(createMainDiv.popupActive === false){
         createMainDiv.popupActive = true;
 
-        const detailId = proj.id;
+        const detailId = proj.projectId;
         activeProjectController.setActiveProject(detailId);
+        console.log(activeProjectController.activeProject);
 
 
         //only allow 1 input active at once
@@ -318,15 +348,15 @@ const createProjDetail = (proj) => {
         const addTaskBtn = document.getElementById('addTaskBtn');
         const deleteProjBtn = document.getElementById('deleteProjBtn');
 
-        //Create task entry inputs
+        //Create task entry inputs that will become task holders
         const createTaskInput = () => {
-            let thisTaskId = proj.taskCounter;
+            let thisTaskId = `${proj.projectId}.${proj.taskCounter}`;
 
             if(isInputActive === false){
                 isInputActive = true;
 
                 const newTaskInput = document.createElement('div');
-                newTaskInput.setAttribute(`id`, `newTaskInput${thisTaskId}`);
+                newTaskInput.setAttribute(`id`, `${thisTaskId}`);
                 newTaskInput.setAttribute(`class`, `newTaskInput`);
                 taskViewer.appendChild(newTaskInput);
 
@@ -356,7 +386,7 @@ const createProjDetail = (proj) => {
 
             const confirmTaskBtn = document.getElementById(`confirmTaskBtn${thisTaskId}`);
             const cancelAddTaskBtn = document.getElementById(`cancelAddTaskBtn${thisTaskId}`);
-            const newTaskDiv = document.getElementById(`newTaskInput${thisTaskId}`)
+            const newTaskDiv = document.getElementById(`${thisTaskId}`)
 
             //"+" button after new task name has been entered
             const confirmTaskBtnFunc = () => {
@@ -377,9 +407,10 @@ const createProjDetail = (proj) => {
                 //replace input element with p element in dom
                 newTaskName.replaceWith(taskReplacer);
 
-                //change class of the new div to incompleteTask
+                //set class of the new div to incompleteTask
                 newTaskDiv.setAttribute(`class`, `incompleteTask`);
                 
+                //Set isInputActive back to false so another input can be created
                 isInputActive = false;
 
                 confirmTaskBtn.style.display = `none`;
@@ -399,7 +430,7 @@ const createProjDetail = (proj) => {
             const cancelTaskFunc = () => {
 
                 //remove task from task viewer in dom
-                const taskInDom = document.getElementById(`newTaskInput${thisTaskId}`);
+                const taskInDom = document.getElementById(`${thisTaskId}`);
                 taskViewer.removeChild(taskInDom);
 
                 //remove task from project task array

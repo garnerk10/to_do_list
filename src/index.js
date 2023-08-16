@@ -115,9 +115,8 @@ newProjBtn.addEventListener('click', togglePopup);
 const confirmNewProj = () => {
     let newName = projNameInput.value;
     let newDue = projDueInput.value;
-    const newProject = createProject(newName, newDue);
-
-    projectHolder.addProject(newProject);
+    
+    projectHolder.addProject(projectHolder.createProject(newName, newDue));
 
     createProjCard(newName, newDue);
 
@@ -126,6 +125,8 @@ const confirmNewProj = () => {
 
     projectHolder.projCounter++;
     togglePopup();
+    console.log(projectHolder.projectArr);
+
 };
 confirmBtn.addEventListener('click', confirmNewProj);
 
@@ -148,7 +149,9 @@ const createProjCard = (name, due) => {
         newProjDueDate.setAttribute(`class`, `projDueDate`);
         newProjCard.appendChild(newProjDueDate);
 
-    newProjCard.onclick = (e) => {createProjDetail(projectHolder.projectArr.find(({projectId}) => projectId == e.target.id))};
+    newProjCard.onclick = (e) => {
+        projectHolder.projectArr.find(({projectId}) => projectId == e.target.id).createProjectDetail()
+    };
 
 }
 
@@ -162,62 +165,43 @@ const projectHolder = (() => {
         projectArr.push(obj);
     };
 
-    const removeProject = (num) => {
-        projectArr = projectArr.filter(proj => proj.id !== num);
-    }
-
-    return{projectArr, addProject, projCounter, removeProject};
-})();
-
-
-//Set active project being viewed in dom so it can be accessed by other functions
-const activeProjectController = (() => {
-    let isProjDetailActive = false;
-    let activeProject = {};
-    const setActiveProject = (num) => {
-        if(isProjDetailActive === false){
-            activeProjectController.activeProject = projectHolder.projectArr.find(({projectId}) => projectId == num);
-        };
-        console.log(activeProjectController.activeProject);
+    const createProject = (str, num) => {
+        return str = new Project(str, num)
     };
-    return{isProjDetailActive, activeProject, setActiveProject};
+
+    const removeProject = (num) => {
+        projectArr = projectArr.filter(proj => proj.projectId !== num);
+    }
+
+    return{projectArr, addProject, projCounter, removeProject, createProject};
 })();
 
 
-//project factory function
-const createProject = (name, dueDate) => {
-    const projectId = projectHolder.projCounter;
-    let taskList = [];
-    let taskCounter = 0;
 
-    class Task {
-        constructor(name) {
-            this.taskId = `${projectId}.${taskCounter}`,
-            this.owningProject = projectId,
-            this.taskCompleted = false,
-            this.name = name,
+class Project {
+    constructor(name, dueDate) {
+        this.name = name;
+        this.dueDate = dueDate;
+        this.taskList = [];
+        this.taskCounter = 0;
+        this.projectId = projectHolder.projCounter;
+    };
 
-            this.toggleTaskCompleted = function(){
-                if(this.taskCompleted === false){
-                    this.taskCompleted = true;
-                } else if(this.taskCompleted === true){this.taskCompleted = false};
-            }
-        }
+    addTaskToList(taskName) {
+        this.taskList.push(taskName);
+        this.taskCounter++;
+    };
+
+    createTask(taskName) {
+        return taskName = new Task(taskName, this.projectId, this.taskCounter);
     }
 
-    const createTask = (str) => {
-        return str = new Task(str);
-    }
+    removeTaskFromList(taskIdNum){
+        this.taskList = this.taskList.filter(task => task.taskId !== taskIdNum);
+    };
 
-    function addTaskToList(task) {
-            taskList.push(createTask(task));
-            taskCounter++;
-            console.log(taskList);
-        }
-
-    //display tasks from taskList in project detail
-    const displayTasks = () => {
-        taskList.forEach((task) => {
+    displayTasks(){
+        this.taskList.forEach((task) => {
             const taskBeingAdded = document.createElement(`div`);
             const taskViewer = document.getElementById(`detailTaskViewer`);
             taskViewer.appendChild(taskBeingAdded);
@@ -242,226 +226,232 @@ const createProject = (name, dueDate) => {
                     task.toggleTaskCompleted()};
             });
 
+
+                //add <p> containing task name to task div
                 const taskName = document.createElement(`p`);
                 taskName.innerText = `${task.name}`;
                 taskBeingAdded.appendChild(taskName);
 
+                //add div to hold task buttons
                 const btnHolder = document.createElement(`div`);
                 btnHolder.className = `newTaskBtns`;
                 taskBeingAdded.appendChild(btnHolder);
-                
+
+                    //task cancel button
                     const cancelBtn = document.createElement(`h4`);
                     cancelBtn.setAttribute(`id`, `cancelAddTaskBtn${task.taskId}`);
                     cancelBtn.setAttribute(`class`, `newTaskBtn`);
                     cancelBtn.innerText = `X`;
                     btnHolder.appendChild(cancelBtn);
 
+                    //task cancel button function
                     cancelBtn.addEventListener(`click`, function(){
                         //remove task from task viewer in dom
                         const taskInDom = document.getElementById(`${task.taskId}`);
                         taskViewer.removeChild(taskInDom);
 
                         //remove task from project task array
-                        taskList = taskList.filter(each => each.taskId !== task.taskId);
-                    })
-
+                        removeTaskFromList(task.taskId);
+                    });
         })
-    }
+    };
 
-    return {name, dueDate, projectId, taskList, addTaskToList, taskCounter, displayTasks};
+    //show project detail when project card is clicked
+    createProjectDetail(){
+        if(createMainDiv.popupActive === false){
+            createMainDiv.popupActive = true;
+
+            const projDetailPopup = document.createElement('div');
+            projDetailPopup.setAttribute('id', 'projDetailPopup');
+            projDetailPopup.setAttribute('class', 'projDetailPopup');
+            mainDiv.appendChild(projDetailPopup);
+
+                projDetailPopup.innerHTML = `
+                <div id="detailHeader">
+                    <h2 class="detailTitle">${this.name}</h2>
+                    <h2 class="detailDue">${this.dueDate}</h2>
+                    <h5 id="closeBtn">X</h5>
+                </div>
+
+                <div id="detailTaskViewer"></div>
+
+                <div id="detailFooter">
+                    <h3 id="addTaskBtn">Add Task</h3>
+                    <h3 id="deleteProjBtn">Delete Project</h3>
+                </div>`;
+
+            //Close button at top right of project detail popup and ensure multiple popups don't appear
+            const closeBtn = document.getElementById('closeBtn');
+            closeBtn.onclick = () => {
+                projDetailPopup.remove();
+                createMainDiv.popupActive = false;
+            };
+
+            //Functions within project detail popup
+            const taskViewer = document.getElementById('detailTaskViewer');
+            const addTaskBtn = document.getElementById('addTaskBtn');
+            const deleteProjBtn = document.getElementById('deleteProjBtn');
+
+            const createTaskInput = () => {
+                let thisTaskId = `${this.projectId}.${this.taskCounter}`;
+
+                if(isInputActive === false){
+                    isInputActive = true;
+
+                    //new task input container
+                    const newTaskInput = document.createElement('div');
+                    newTaskInput.setAttribute(`id`, `${thisTaskId}`);
+                    newTaskInput.setAttribute(`class`, `newTaskInput`);
+                    taskViewer.appendChild(newTaskInput);
+
+                        //new task input feild
+                        const taskInputEle = document.createElement('input');
+                        taskInputEle.setAttribute(`id`, `taskName${thisTaskId}`);
+                        taskInputEle.setAttribute(`placeholder`, `New Task`);
+                        taskInputEle.setAttribute(`name`, `taskName${thisTaskId}`);
+                        newTaskInput.appendChild(taskInputEle);
+
+                        //new task buttons container
+                        const newTaskBtnsDiv = document.createElement('div');
+                        newTaskBtnsDiv.setAttribute(`class`, `newTaskBtns`);
+
+                            //confirm new task button
+                            const confirmBtnEle = document.createElement('h4');
+                            confirmBtnEle.setAttribute(`id`, `confirmTaskBtn${thisTaskId}`);
+                            confirmBtnEle.setAttribute(`class`, `newTaskBtn`);
+                            confirmBtnEle.innerText = `+`;
+
+                            //cancel task button
+                            const cancelAddTaskBtnEle = document.createElement(`h4`);
+                            cancelAddTaskBtnEle.setAttribute(`id`, `cancelAddTaskBtn${thisTaskId}`);
+                            cancelAddTaskBtnEle.setAttribute(`class`, `newTaskBtn`);
+                            cancelAddTaskBtnEle.innerText = `X`;
+
+                            newTaskBtnsDiv.appendChild(confirmBtnEle);
+                            newTaskBtnsDiv.appendChild(cancelAddTaskBtnEle);
+                        newTaskInput.appendChild(newTaskBtnsDiv);
+                };
+
+                const confirmTaskBtn = document.getElementById(`confirmTaskBtn${thisTaskId}`);
+
+                const cancelAddTaskBtn = document.getElementById(`cancelAddTaskBtn${thisTaskId}`);
+
+                //"+" button after new task name has been entered
+                const confirmTaskBtnFunction = () => {
+                    const newTaskName = document.getElementById(`taskName${thisTaskId}`);
+
+                    //get input value from new task input
+                    const inputValue = newTaskName.value;
+
+                    //add task to task array of project
+                    this.addTaskToList(this.createTask(inputValue));
+
+                    //new element to replace the input element
+                    const taskReplacer = document.createElement('p');
+                    taskReplacer.innerText = `${inputValue}`;
+
+                    //replace input element with p element in dom
+                    newTaskName.replaceWith(taskReplacer);
+
+                    //set class of the new div to incompleteTask
+                    const newTaskDiv = document.getElementById(`${thisTaskId}`);
+                    newTaskDiv.setAttribute(`class`, `incompleteTask`);
+                    
+                    //Set isInputActive back to false so another input can be created
+                    isInputActive = false;
+
+                    confirmTaskBtn.style.display = `none`;
+                    confirmTaskBtn.removeEventListener(`click`, confirmTaskBtnFunction);
+
+                    const addListenter = () => {
+                        newTaskDiv.onclick = domTaskToggle;
+                        cancelAddTaskBtn.onclick = projectHolder.projectArr.find(({projectId}) => projectId == this.projectId).removeTaskFromList(this.projectId);
+                    }
+                    setTimeout(addListenter(this.projectId), 100);
+                };
+                confirmTaskBtn.addEventListener(`click`, confirmTaskBtnFunction);
+
+
+                //Remove task button "X", to remove task from project task array and dom
+                const cancelTaskFunc = () => {
+
+                    //remove task from task viewer in dom
+                    const taskInDom = document.getElementById(`${thisTaskId}`);
+                    taskViewer.removeChild(taskInDom);
+
+                    //remove task from project task array
+                    this.removeTaskFromList(thisTaskId)
+
+                };
+                cancelAddTaskBtn.addEventListener(`click`, cancelTaskFunc);
+            };
+            addTaskBtn.addEventListener('click', createTaskInput);
+
+            //Remove project from dom and project array
+            const removeProjectFunction = () => {
+                if(confirm(`Delete this project?`) == true){
+                    //remove project from dom
+                    const projToRemoveDom = document.getElementById(`${this.projectId}`);
+                    projectViewer.removeChild(projToRemoveDom);
+        
+                    //remove project from project array
+                    projectHolder.removeProject(this.projectId);
+        
+                    //close project detail popup
+                    projDetailPopup.remove();
+                    createMainDiv.popupActive = false;
+                    };
+            };
+            deleteProjBtn.addEventListener('click', removeProjectFunction);
+        
+        this.displayTasks();
+
+
+        };
+    };
+
+
 };
+
+//only allow 1 new task input to be active at once
+let isInputActive = false;
+
+function Task(name, projectId, projectTaskCounter) {
+        this.taskId = `${projectId}.${projectTaskCounter}`,
+        this.owningProject = projectId,
+        this.taskCompleted = false,
+        this.name = name,
+    
+        this.toggleTaskCompleted = function() {
+            if(this.taskCompleted === false){
+                this.taskCompleted = true;
+            } else if(this.taskCompleted === true){this.taskCompleted = false};
+        };
+}
+
+const createNewTask = (taskName, projectId, projectTaskCounter) => {
+    return taskName = new Task(taskName, projectId, projectTaskCounter)
+}
 
 //Toggle whether a task is completed or not in dom
 const domTaskToggle = (e) => {
     const divId = e.target.id;
 
     if(e.target.className == `incompleteTask`){
+        //change class of dom task
         e.target.className = `completeTask`;
 
-        //Access the projectHolder array, match the proj ID to the activeProject, match the taskId to the id of the target div
-        //projectHolder.projectArr.find((proj) => proj.id == activeProjectController.activeProject.id).taskList.find((tsk) => tsk.id == divId).toggleTaskCompleted();
-
-        let thisProject = activeProjectController.activeProject;
-        console.log(activeProjectController.activeProject);
-        let thisTaskList = thisProject.taskList;
-        console.log(thisTaskList);
-        let thisTask = thisTaskList.find(({taskId}) => taskId == divId);
-        console.log(thisTask);
-        thisTask.toggleTaskCompleted();
+        let getProject = projectHolder.projectArr.find(({projectId}) => projectId == activeProjectController.activeProject.projectId);
+        let getTask = getProject.taskList.find(({taskId}) => taskId == divId);
+        getTask.toggleTaskCompleted();
     } else if(e.target.className == `completeTask`){
         e.target.className = `incompleteTask`;
 
-        //projectHolder.projectArr.find((proj) => proj.id === activeProjectController.activeProject.id).taskList.find((tsk) => tsk.id === divId).toggleTaskCompleted();
         let thisProject = activeProjectController.activeProject;
         let thisTaskList = thisProject.taskList;
         let thisTask = thisTaskList.find(({taskId}) => taskId == divId);
         thisTask.toggleTaskCompleted();
         
+        
     };
-
-    console.log(projectHolder.projectArr);
 };
-
-//Project Detail Popup
-//create project detail popup
-const createProjDetail = (proj) => {
-
-    if(createMainDiv.popupActive === false){
-        createMainDiv.popupActive = true;
-
-        const detailId = proj.projectId;
-        activeProjectController.setActiveProject(detailId);
-        console.log(activeProjectController.activeProject);
-
-
-        //only allow 1 input active at once
-        let isInputActive = false;
-
-        const projDetailPopup = document.createElement('div');
-        projDetailPopup.setAttribute('id', 'projDetailPopup');
-        projDetailPopup.setAttribute('class', 'projDetailPopup');
-        mainDiv.appendChild(projDetailPopup);
-        
-            projDetailPopup.innerHTML = `
-            <div id="detailHeader">
-                <h2 class="detailTitle">${proj.name}</h2>
-                <h2 class="detailDue">${proj.dueDate}</h2>
-                <h5 id="closeBtn">X</h5>
-            </div>
-
-            <div id="detailTaskViewer"></div>
-
-            <div id="detailFooter">
-                <h3 id="addTaskBtn">Add Task</h3>
-                <h3 id="deleteProjBtn">Delete Project</h3>
-            </div>`;
-
-        //Close button and ensure multiple popups don't appear
-        const closeBtn = document.getElementById('closeBtn');
-        closeBtn.onclick = () => {
-            projDetailPopup.remove();
-            createMainDiv.popupActive = false;
-        };
-
-        //Functions within project detail popup
-        const taskViewer = document.getElementById('detailTaskViewer');
-        const addTaskBtn = document.getElementById('addTaskBtn');
-        const deleteProjBtn = document.getElementById('deleteProjBtn');
-
-        //Create task entry inputs that will become task holders
-        const createTaskInput = () => {
-            let thisTaskId = `${proj.projectId}.${proj.taskCounter}`;
-
-            if(isInputActive === false){
-                isInputActive = true;
-
-                const newTaskInput = document.createElement('div');
-                newTaskInput.setAttribute(`id`, `${thisTaskId}`);
-                newTaskInput.setAttribute(`class`, `newTaskInput`);
-                taskViewer.appendChild(newTaskInput);
-
-                    const taskInputEle = document.createElement('input');
-                    taskInputEle.setAttribute(`id`, `taskName${thisTaskId}`);
-                    taskInputEle.setAttribute(`placeholder`, `New Task`);
-                    taskInputEle.setAttribute(`name`, `taskName${thisTaskId}`);
-                    newTaskInput.appendChild(taskInputEle);
-
-                    const newTaskBtnsDiv = document.createElement('div');
-                    newTaskBtnsDiv.setAttribute(`class`, `newTaskBtns`);
-
-                        const confirmBtnEle = document.createElement('h4');
-                        confirmBtnEle.setAttribute(`id`, `confirmTaskBtn${thisTaskId}`);
-                        confirmBtnEle.setAttribute(`class`, `newTaskBtn`);
-                        confirmBtnEle.innerText = `+`;
-
-                        const cancelAddTaskBtnEle = document.createElement(`h4`);
-                        cancelAddTaskBtnEle.setAttribute(`id`, `cancelAddTaskBtn${thisTaskId}`);
-                        cancelAddTaskBtnEle.setAttribute(`class`, `newTaskBtn`);
-                        cancelAddTaskBtnEle.innerText = `X`;
-
-                        newTaskBtnsDiv.appendChild(confirmBtnEle);
-                        newTaskBtnsDiv.appendChild(cancelAddTaskBtnEle);
-                    newTaskInput.appendChild(newTaskBtnsDiv);
-            };
-
-            const confirmTaskBtn = document.getElementById(`confirmTaskBtn${thisTaskId}`);
-            const cancelAddTaskBtn = document.getElementById(`cancelAddTaskBtn${thisTaskId}`);
-            const newTaskDiv = document.getElementById(`${thisTaskId}`)
-
-            //"+" button after new task name has been entered
-            const confirmTaskBtnFunc = () => {
-
-                const newTaskName = document.getElementById(`taskName${thisTaskId}`);
-
-                //get input value from new task input
-                const inputValue = newTaskName.value;
-
-                //add task to task array of project
-                proj.addTaskToList(inputValue);
-                proj.taskCounter++;
-
-                //new element to replace the input element
-                const taskReplacer = document.createElement('p');
-                taskReplacer.innerText = `${inputValue}`;
-
-                //replace input element with p element in dom
-                newTaskName.replaceWith(taskReplacer);
-
-                //set class of the new div to incompleteTask
-                newTaskDiv.setAttribute(`class`, `incompleteTask`);
-                
-                //Set isInputActive back to false so another input can be created
-                isInputActive = false;
-
-                confirmTaskBtn.style.display = `none`;
-                confirmTaskBtn.removeEventListener(`click`, confirmTaskBtnFunc);
-
-                const addListenter = () => {
-                    newTaskDiv.onclick = domTaskToggle;
-                }
-                setTimeout(addListenter, 100);
-                
-            };
-            confirmTaskBtn.addEventListener(`click`, confirmTaskBtnFunc);
-
-
-
-            //Remove task button "X", to remove task from project task array and dom
-            const cancelTaskFunc = () => {
-
-                //remove task from task viewer in dom
-                const taskInDom = document.getElementById(`${thisTaskId}`);
-                taskViewer.removeChild(taskInDom);
-
-                //remove task from project task array
-                proj.taskList = proj.taskList.filter(task => task.taskId !== thisTaskId);
-
-            };
-            cancelAddTaskBtn.addEventListener(`click`, cancelTaskFunc);
-
-        };
-        addTaskBtn.addEventListener('click', createTaskInput);
-
-        //Remove project from dom and project array
-        const removeProjFunc = () => {
-            
-            if(confirm(`Delete this project?`) == true){
-            //remove project from dom
-            const projToRemoveDom = document.getElementById(`${detailId}`);
-            projectViewer.removeChild(projToRemoveDom);
-
-            //remove project from project array
-            projectHolder.removeProject(detailId);
-
-            //close project detail popup
-            projDetailPopup.remove();
-            createMainDiv.popupActive = false;
-            };
-        };
-        deleteProjBtn.addEventListener(`click`, removeProjFunc);
-        
-
-    };
-
-    proj.displayTasks();
-}

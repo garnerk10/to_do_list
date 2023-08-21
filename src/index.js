@@ -124,8 +124,8 @@ const confirmNewProj = () => {
     projDueInput.value = '';
 
     projectHolder.projCounter++;
+    console.log(projectHolder);
     togglePopup();
-    console.log(projectHolder.projectArr);
 
 };
 confirmBtn.addEventListener('click', confirmNewProj);
@@ -149,9 +149,9 @@ const createProjCard = (name, due) => {
         newProjDueDate.setAttribute(`class`, `projDueDate`);
         newProjCard.appendChild(newProjDueDate);
 
-    newProjCard.onclick = (e) => {
+    newProjCard.addEventListener(`click`, function(e){
         projectHolder.projectArr.find(({projectId}) => projectId == e.target.id).createProjectDetail()
-    };
+    })
 
 }
 
@@ -163,14 +163,17 @@ const projectHolder = (() => {
 
     const addProject = (obj) => {
         projectArr.push(obj);
+        console.log(projectHolder);
     };
 
     const createProject = (str, num) => {
-        return str = new Project(str, num)
+        return str = new Project(str, num);
     };
 
     const removeProject = (num) => {
-        projectArr = projectArr.filter(proj => proj.projectId !== num);
+        let removeIndex = projectArr.findIndex(proj => proj.projectId == num);
+        projectArr.splice(removeIndex, removeIndex + 1);
+        console.log(projectHolder);
     }
 
     return{projectArr, addProject, projCounter, removeProject, createProject};
@@ -198,6 +201,10 @@ class Project {
 
     removeTaskFromList(taskIdNum){
         this.taskList = this.taskList.filter(task => task.taskId !== taskIdNum);
+    };
+
+    toggleTask(id){
+        this.taskList.find(({taskId}) => taskId == id).toggleTaskCompleted()
     };
 
     displayTasks(){
@@ -253,7 +260,7 @@ class Project {
                         //remove task from project task array
                         removeTaskFromList(task.taskId);
                     });
-        })
+        });
     };
 
     //show project detail when project card is clicked
@@ -364,7 +371,13 @@ class Project {
                     confirmTaskBtn.removeEventListener(`click`, confirmTaskBtnFunction);
 
                     const addListenter = () => {
+                        //add ability to change class of div in the dom to show if task is completed or not
                         newTaskDiv.onclick = domTaskToggle;
+
+                        //add ability to change if task is complete/incomplete in the project task array
+                        this.toggleTask(thisTaskId);
+
+                        //remove task from project array
                         cancelAddTaskBtn.onclick = projectHolder.projectArr.find(({projectId}) => projectId == this.projectId).removeTaskFromList(this.projectId);
                     }
                     setTimeout(addListenter(this.projectId), 100);
@@ -400,7 +413,7 @@ class Project {
                     //close project detail popup
                     projDetailPopup.remove();
                     createMainDiv.popupActive = false;
-                    };
+                };
             };
             deleteProjBtn.addEventListener('click', removeProjectFunction);
         
@@ -409,8 +422,6 @@ class Project {
 
         };
     };
-
-
 };
 
 //only allow 1 new task input to be active at once
@@ -429,10 +440,6 @@ function Task(name, projectId, projectTaskCounter) {
         };
 }
 
-const createNewTask = (taskName, projectId, projectTaskCounter) => {
-    return taskName = new Task(taskName, projectId, projectTaskCounter)
-}
-
 //Toggle whether a task is completed or not in dom
 const domTaskToggle = (e) => {
     const divId = e.target.id;
@@ -441,17 +448,8 @@ const domTaskToggle = (e) => {
         //change class of dom task
         e.target.className = `completeTask`;
 
-        let getProject = projectHolder.projectArr.find(({projectId}) => projectId == activeProjectController.activeProject.projectId);
-        let getTask = getProject.taskList.find(({taskId}) => taskId == divId);
-        getTask.toggleTaskCompleted();
     } else if(e.target.className == `completeTask`){
         e.target.className = `incompleteTask`;
 
-        let thisProject = activeProjectController.activeProject;
-        let thisTaskList = thisProject.taskList;
-        let thisTask = thisTaskList.find(({taskId}) => taskId == divId);
-        thisTask.toggleTaskCompleted();
-        
-        
     };
 };

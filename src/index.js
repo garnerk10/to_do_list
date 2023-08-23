@@ -200,11 +200,13 @@ class Project {
     }
 
     removeTaskFromList(taskIdNum){
-        this.taskList = this.taskList.filter(task => task.taskId !== taskIdNum);
+        let removeTaskIndex = this.taskList.findIndex(task => task.taskId == taskIdNum);
+        this.taskList.splice(removeTaskIndex, removeTaskIndex + 1);
     };
 
     toggleTask(id){
-        this.taskList.find(({taskId}) => taskId == id).toggleTaskCompleted()
+        let taskToggleIndex = this.taskList.findIndex(task => task.taskId == id);
+        this.taskList[taskToggleIndex].toggleTaskCompleted();
     };
 
     displayTasks(){
@@ -352,8 +354,13 @@ class Project {
 
                     //add task to task array of project
                     this.addTaskToList(this.createTask(inputValue));
+                    console.log(this);
 
-                    //new element to replace the input element
+                    //identify and set task to make it accessable to other functions
+                    let newTaskIndex = this.taskList.findIndex(task => task.taskId == thisTaskId);
+                    let thisTask = this.taskList[newTaskIndex];
+
+                    //new element to replace the text input element for the task name
                     const taskReplacer = document.createElement('p');
                     taskReplacer.innerText = `${inputValue}`;
 
@@ -367,22 +374,37 @@ class Project {
                     //Set isInputActive back to false so another input can be created
                     isInputActive = false;
 
+
+                    const addListener = () => {
+                        newTaskDiv.onclick = function(){
+                            if(newTaskDiv.className == `incompleteTask`){
+                                //change class of dom task
+                                newTaskDiv.className = `completeTask`;
+                                thisTask.toggleTaskCompleted()
+                        
+                            } else if(newTaskDiv.className == `completeTask`){
+                                newTaskDiv.className = `incompleteTask`;
+                                thisTask.toggleTaskCompleted();
+                                
+                            };
+                        };
+                    };
+                    setTimeout(addListener, 100);
+
+                    //toggle task complete/incomplete in task array
+                    
+
                     confirmTaskBtn.style.display = `none`;
                     confirmTaskBtn.removeEventListener(`click`, confirmTaskBtnFunction);
-
-                    const addListenter = () => {
-                        //add ability to change class of div in the dom to show if task is completed or not
-                        newTaskDiv.onclick = domTaskToggle;
-
-                        //add ability to change if task is complete/incomplete in the project task array
-                        this.toggleTask(thisTaskId);
-
-                        //remove task from project array
-                        cancelAddTaskBtn.onclick = projectHolder.projectArr.find(({projectId}) => projectId == this.projectId).removeTaskFromList(this.projectId);
-                    }
-                    setTimeout(addListenter(this.projectId), 100);
+                        
                 };
                 confirmTaskBtn.addEventListener(`click`, confirmTaskBtnFunction);
+
+
+
+
+
+
 
 
                 //Remove task button "X", to remove task from project task array and dom
@@ -417,9 +439,7 @@ class Project {
             };
             deleteProjBtn.addEventListener('click', removeProjectFunction);
         
-        this.displayTasks();
-
-
+            this.displayTasks();
         };
     };
 };
@@ -452,4 +472,6 @@ const domTaskToggle = (e) => {
         e.target.className = `incompleteTask`;
 
     };
+
+    console.log(projectHolder);
 };

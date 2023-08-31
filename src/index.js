@@ -115,17 +115,17 @@ newProjBtn.addEventListener('click', togglePopup);
 const confirmNewProj = () => {
     let newName = projNameInput.value;
     let newDue = projDueInput.value;
-    
-    projectHolder.addProject(projectHolder.createProject(newName, newDue));
 
     createProjCard(newName, newDue);
+    
+    projectHolder.addProject(projectHolder.createProject(newName, newDue));
 
     projNameInput.value = '';
     projDueInput.value = '';
 
-    projectHolder.projCounter++;
     console.log(projectHolder);
     togglePopup();
+    updateStorage();
 
 };
 confirmBtn.addEventListener('click', confirmNewProj);
@@ -133,10 +133,9 @@ confirmBtn.addEventListener('click', confirmNewProj);
 
 //add new project card to dom
 const createProjCard = (name, due) => {
-    const projCounterValue = projectHolder.projCounter;
     const newProjCard = document.createElement('div');
     newProjCard.setAttribute('class', 'projCard');
-    newProjCard.setAttribute(`id`, `${projCounterValue}`);
+    newProjCard.setAttribute(`id`, `${projectHolder.projCounter}`);
     projectViewer.appendChild(newProjCard);
 
         const newProjTitle = document.createElement('h4');
@@ -163,11 +162,13 @@ const projectHolder = (() => {
 
     const addProject = (obj) => {
         projectArr.push(obj);
-        console.log(projectHolder);
+        projectHolder.projCounter++;
+        updateStorage();
+        console.log(projCounter);
     };
 
     const createProject = (str, num) => {
-        return str = new Project(str, num);
+        return str = new Project(str, num, projectHolder.projCounter);
     };
 
     const removeProject = (num) => {
@@ -182,17 +183,18 @@ const projectHolder = (() => {
 
 
 class Project {
-    constructor(name, dueDate) {
+    constructor(name, dueDate, id) {
         this.name = name;
         this.dueDate = dueDate;
         this.taskList = [];
         this.taskCounter = 0;
-        this.projectId = projectHolder.projCounter;
+        this.projectId = id;
     };
 
     addTaskToList(taskName) {
         this.taskList.push(taskName);
         this.taskCounter++;
+        updateStorage();
     };
 
     createTask(taskName) {
@@ -202,11 +204,13 @@ class Project {
     removeTaskFromList(taskIdNum){
         let removeTaskIndex = this.taskList.findIndex(task => task.taskId == taskIdNum);
         this.taskList.splice(removeTaskIndex, removeTaskIndex + 1);
+        updateStorage();
     };
 
     toggleTask(id){
         let taskToggleIndex = this.taskList.findIndex(task => task.taskId == id);
         this.taskList[taskToggleIndex].toggleTaskCompleted();
+        updateStorage();
     };
 
     displayTasks(){
@@ -233,6 +237,8 @@ class Project {
                 } else {
                     taskBeingAdded.className =`incompleteTask`;
                     task.toggleTaskCompleted()};
+
+                updateStorage();
             });
 
 
@@ -387,6 +393,8 @@ class Project {
                                 thisTask.toggleTaskCompleted();
                                 
                             };
+
+                            updateStorage();
                         };
                     };
                     setTimeout(addListener, 100);
@@ -396,6 +404,8 @@ class Project {
 
                     confirmTaskBtn.style.display = `none`;
                     confirmTaskBtn.removeEventListener(`click`, confirmTaskBtnFunction);
+
+                    updateStorage();
                         
                 };
                 confirmTaskBtn.addEventListener(`click`, confirmTaskBtnFunction);
@@ -457,6 +467,7 @@ function Task(name, projectId, projectTaskCounter) {
             if(this.taskCompleted === false){
                 this.taskCompleted = true;
             } else if(this.taskCompleted === true){this.taskCompleted = false};
+            updateStorage();
         };
 }
 
@@ -475,3 +486,50 @@ const domTaskToggle = (e) => {
 
     console.log(projectHolder);
 };
+
+
+
+
+//local storage functions
+
+const updateStorage = () => {
+    localStorage.setItem(`projectArray`, JSON.stringify(projectHolder.projectArr));
+};
+
+window.addEventListener(`load`, function(){
+    if(localStorage.length > 0){
+    const getProjectArray = this.localStorage.getItem(`projectArray`);
+    console.log(getProjectArray);
+    
+    let parsedObject = JSON.parse(getProjectArray);
+    console.log(parsedObject);
+
+    //create each individual project from local storage
+    parsedObject.forEach((project) => {
+        
+        //first create the project
+        let savedProject = projectHolder.createProject(project.name, project.dueDate, project.id);
+
+        //create the saved tasks and add them to the new task list
+        project.taskList.forEach((task) => {
+            const savedTask = savedProject.createTask(task.name);
+
+            if(task.taskCompleted === true){
+                savedTask.taskCompleted = true;
+            };
+
+            savedProject.addTaskToList(savedTask);
+        });
+
+        //create a project card in the dom
+        createProjCard(project.name, project.dueDate);
+
+        //add the final savedProject to the projectHolder
+        projectHolder.addProject(savedProject);
+        
+        
+
+    })
+
+    }
+})

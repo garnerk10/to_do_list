@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/garnerk10/t0_do_list#readme",
   "devDependencies": {
-    "css-loader": "^6.7.4",
+    "css-loader": "^6.8.1",
     "gh-pages": "^5.0.0",
     "html-webpack-plugin": "^5.5.1",
     "style-loader": "^3.3.3",
@@ -32,6 +32,8 @@
     "webpack-dev-server": "^4.15.0"
   },
   "dependencies": {
-    "date-fns": "^2.30.0"
+    "date-fns": "^2.30.0",
+    "css-loader": "^6.7.3",
+    "style-loader": "^3.3.2"
   }
 }

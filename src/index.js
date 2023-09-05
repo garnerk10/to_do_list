@@ -1,4 +1,4 @@
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays, formatDistanceToNowStrict, differenceInDays } from 'date-fns';
 import './style.css';
 
 const createContent = (() => {
@@ -114,7 +114,7 @@ newProjBtn.addEventListener('click', togglePopup);
 //"Add" button functionality on new project popup
 const confirmNewProj = () => {
     let newName = projNameInput.value;
-    let newDue = projDueInput.value;
+    let newDue = projDueInput.valueAsNumber;
 
     createProjCard(newName, newDue);
     
@@ -123,7 +123,6 @@ const confirmNewProj = () => {
     projNameInput.value = '';
     projDueInput.value = '';
 
-    console.log(projectHolder);
     togglePopup();
     updateStorage();
 
@@ -144,13 +143,27 @@ const createProjCard = (name, due) => {
         newProjCard.appendChild(newProjTitle);
 
         const newProjDueDate = document.createElement('h5');
-        newProjDueDate.innerText = `${due}`;
+        newProjDueDate.innerText = `${format(due, `MM/dd/yyyy`)}`;
         newProjDueDate.setAttribute(`class`, `projDueDate`);
         newProjCard.appendChild(newProjDueDate);
 
     newProjCard.addEventListener(`click`, function(e){
         projectHolder.projectArr.find(({projectId}) => projectId == e.target.id).createProjectDetail()
-    })
+    });
+
+    //change color of the card based on how close the date is to the due date
+    let currentDate = Date.now();
+    
+    let dateDifference = differenceInCalendarDays(due, currentDate);
+    console.log(dateDifference);
+
+    if(dateDifference <= 3){
+        newProjCard.classList.add(`dueNow`)
+    } else if(dateDifference > 3 && dateDifference <= 10){
+        newProjCard.classList.add(`dueSoon`)
+    } else if(dateDifference > 10){
+        newProjCard.classList.add(`dueLater`)
+    }
 
 }
 
@@ -471,21 +484,9 @@ function Task(name, projectId, projectTaskCounter) {
         };
 }
 
-//Toggle whether a task is completed or not in dom
-const domTaskToggle = (e) => {
-    const divId = e.target.id;
 
-    if(e.target.className == `incompleteTask`){
-        //change class of dom task
-        e.target.className = `completeTask`;
+//date functions
 
-    } else if(e.target.className == `completeTask`){
-        e.target.className = `incompleteTask`;
-
-    };
-
-    console.log(projectHolder);
-};
 
 
 

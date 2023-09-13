@@ -1,4 +1,4 @@
-import { format, differenceInCalendarDays, formatDistanceToNowStrict, differenceInDays } from 'date-fns';
+import { format, differenceInCalendarDays, formatDistanceToNowStrict, differenceInDays, parse } from 'date-fns';
 import './style.css';
 
 const createContent = (() => {
@@ -41,15 +41,25 @@ const sideBar = (() => {
     sideBar.setAttribute('class', 'sideBar');
     mainDiv.appendChild(sideBar);
 
+        const newProject = document.createElement('h2');
+        newProject.innerText = 'New Project';
+        newProject.setAttribute('id', 'newProjBtn');
+        sideBar.appendChild(newProject);
+
         const viewAll = document.createElement('h2');
         viewAll.innerText = 'View All';
         viewAll.setAttribute('id', 'viewAllBtn');
         sideBar.appendChild(viewAll);
 
-        const newProject = document.createElement('h2');
-        newProject.innerText = 'New Project';
-        newProject.setAttribute('id', 'newProjBtn');
-        sideBar.appendChild(newProject);
+        const viewMonth = document.createElement(`h2`);
+        viewMonth.innerText = `Month`;
+        viewMonth.setAttribute(`id`, `viewMonthBtn`);
+        sideBar.appendChild(viewMonth);
+
+        const viewWeek = document.createElement(`h2`);
+        viewWeek.innerText = `Week`;
+        viewWeek.setAttribute(`id`, `viewWeekBtn`);
+        sideBar.appendChild(viewWeek);
 })();
 
 
@@ -297,7 +307,7 @@ class Project {
                 projDetailPopup.innerHTML = `
                 <div id="detailHeader">
                     <h2 class="detailTitle">${this.name}</h2>
-                    <h2 class="detailDue">${this.dueDate}</h2>
+                    <h2 class="detailDue">${format(this.dueDate, `MM/dd/yyyy`)}</h2>
                     <h5 id="closeBtn">X</h5>
                 </div>
 
@@ -424,12 +434,6 @@ class Project {
                 confirmTaskBtn.addEventListener(`click`, confirmTaskBtnFunction);
 
 
-
-
-
-
-
-
                 //Remove task button "X", to remove task from project task array and dom
                 const cancelTaskFunc = () => {
 
@@ -458,6 +462,8 @@ class Project {
                     //close project detail popup
                     projDetailPopup.remove();
                     createMainDiv.popupActive = false;
+
+                    updateStorage();
                 };
             };
             deleteProjBtn.addEventListener('click', removeProjectFunction);
@@ -485,11 +491,6 @@ function Task(name, projectId, projectTaskCounter) {
 }
 
 
-//date functions
-
-
-
-
 
 //local storage functions
 
@@ -497,13 +498,17 @@ const updateStorage = () => {
     localStorage.setItem(`projectArray`, JSON.stringify(projectHolder.projectArr));
 };
 
+const getStoredProjectArray = () => {
+    let getProjectArray = localStorage.getItem(`projectArray`);
+    let parsedObject = JSON.parse(getProjectArray);
+    return parsedObject
+}
+
 window.addEventListener(`load`, function(){
     if(localStorage.length > 0){
     const getProjectArray = this.localStorage.getItem(`projectArray`);
-    console.log(getProjectArray);
     
     let parsedObject = JSON.parse(getProjectArray);
-    console.log(parsedObject);
 
     //create each individual project from local storage
     parsedObject.forEach((project) => {
@@ -528,9 +533,78 @@ window.addEventListener(`load`, function(){
         //add the final savedProject to the projectHolder
         projectHolder.addProject(savedProject);
         
-        
-
     })
 
     }
-})
+});
+
+//Sorting functions
+const sortBy = (range) => {
+    projectViewer.innerHTML = ``;
+
+    let currentDate = Date.now();
+
+    if(localStorage.length > 0){
+        let projArray = getStoredProjectArray();
+
+        projArray.forEach((project) => {
+            let dateDifference = differenceInCalendarDays(project.dueDate, currentDate);
+
+            if(dateDifference <= range){
+                redoExistingProjCard(project.name, project.dueDate, project.projectId);
+            }
+        })
+    }
+};
+
+const viewMonthBtn = document.getElementById(`viewMonthBtn`);
+viewMonthBtn.onclick = function(){sortBy(30)};
+
+const viewWeekBtn = document.getElementById(`viewWeekBtn`);
+viewWeekBtn.onclick = function(){sortBy(7)};
+
+viewAllBtn.onclick = function(){
+    projectViewer.innerHTML = ``;
+
+    let projArray = getStoredProjectArray();
+    projArray.forEach((project) => {
+        redoExistingProjCard(project.name, project.dueDate, project.projectId)
+    })
+};
+
+
+//function to create project cards for any given project
+const redoExistingProjCard = (name, due, id) => {
+    const newProjCard = document.createElement('div');
+        newProjCard.setAttribute('class', 'projCard');
+        newProjCard.setAttribute(`id`, `${id}`);
+        projectViewer.appendChild(newProjCard);
+
+            const newProjTitle = document.createElement('h4');
+            newProjTitle.innerText = `${name}`;
+            newProjTitle.setAttribute(`class`, `projectTitle`);
+            newProjCard.appendChild(newProjTitle);
+
+            const newProjDueDate = document.createElement('h5');
+            newProjDueDate.innerText = `${format(due, `MM/dd/yyyy`)}`;
+            newProjDueDate.setAttribute(`class`, `projDueDate`);
+            newProjCard.appendChild(newProjDueDate);
+
+        newProjCard.addEventListener(`click`, function(e){
+            projectHolder.projectArr.find(({projectId}) => projectId == e.target.id).createProjectDetail()
+        });
+
+        //change color of the card based on how close the date is to the due date
+        let currentDate = Date.now();
+        
+        let dateDifference = differenceInCalendarDays(due, currentDate);
+        console.log(dateDifference);
+
+        if(dateDifference <= 3){
+            newProjCard.classList.add(`dueNow`)
+        } else if(dateDifference > 3 && dateDifference <= 10){
+            newProjCard.classList.add(`dueSoon`)
+        } else if(dateDifference > 10){
+            newProjCard.classList.add(`dueLater`)
+        }
+}
